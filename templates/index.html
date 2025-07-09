@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        async function getWeather() {
+            const city = document.getElementById('city').value;
+            const unit = document.getElementById('unit').value;
+            if (!city) {
+                alert('Please enter a city');
+                return;
+            }
+
+            document.getElementById('result').innerHTML = '<div class="spinner"></div>';
+
+            const response = await fetch('/weather', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ city, unit })
+            });
+            
+            const data = await response.json();
+            if (response.ok) {
+                let forecastHTML = '';
+                data.forecast.forEach(entry => {
+                    forecastHTML += `
+                        <div class="forecast-entry">
+                            <h3>${entry.date}</h3>
+                            <p>Temperature: ${entry.temperature} ${data.unit}</p>
+                            <p>Description: ${entry.description}</p>
+                        </div>
+                    `;
+                });
+
+                document.getElementById('result').innerHTML = `
+                    <div class="weather-summary">
+                        <h2>Weather in ${data.city}</h2>
+                        <p>Current Temperature: ${data.current.temperature} ${data.unit}</p>
+                        <p>Description: ${data.current.description}</p>
+                        <p>Humidity: ${data.current.humidity} %</p>
+                        <p>Wind Speed: ${data.current.wind_speed} m/s</p>
+                    </div>
+                    <h2>Forecast</h2>
+                    ${forecastHTML}
+                `;
+            } else {
+                document.getElementById('result').innerHTML = `<p class="error">${data.error}</p>`;
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Weather App</h1>
+        <form onsubmit="event.preventDefault(); getWeather();">
+            <label for="city">Enter city:</label>
+            <input type="text" id="city" name="city" required>
+            <div class="inline">
+                <label for="unit">Select unit:</label>
+                <select id="unit" name="unit" required>
+                    <option value="Celsius">Celsius</option>
+                    <option value="Fahrenheit">Fahrenheit</option>
+                    <option value="Kelvin">Kelvin</option>
+                </select>
+            </div>
+            <button type="submit">Get Weather</button>
+        </form>
+        <div id="result"></div>
+    </div>
+</body>
+</html>

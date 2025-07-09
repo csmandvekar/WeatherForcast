@@ -1,0 +1,9 @@
+pytest
+Flask
+Flask-Migrate
+Flask-Script
+Flask-SQLAlchemy
+requests
+APScheduler
+matplotlib
+pandas
